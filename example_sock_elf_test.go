@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/newtools/ebpf"
-	"github.com/newtools/zsocket/nettypes"
 )
 
 var program = [...]byte{
@@ -131,21 +130,27 @@ func Example_socketELF() {
 		panic(fmt.Errorf("no map named \"my_map\" found"))
 	}
 	for {
+		const (
+			ICMP = 0x01
+			TCP  = 0x06
+			UDP  = 0x11
+		)
+
 		time.Sleep(time.Second)
 		var icmp uint64
 		var tcp uint64
 		var udp uint64
-		ok, err := bpfMap.Get(uint32(nettypes.ICMP), &icmp)
+		ok, err := bpfMap.Get(uint32(ICMP), &icmp)
 		if err != nil {
 			panic(err)
 		}
 		assertTrue(ok, "icmp key not found")
-		ok, err = bpfMap.Get(uint32(nettypes.TCP), &tcp)
+		ok, err = bpfMap.Get(uint32(TCP), &tcp)
 		if err != nil {
 			panic(err)
 		}
 		assertTrue(ok, "tcp key not found")
-		ok, err = bpfMap.Get(uint32(nettypes.UDP), &udp)
+		ok, err = bpfMap.Get(uint32(UDP), &udp)
 		if err != nil {
 			panic(err)
 		}

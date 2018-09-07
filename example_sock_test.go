@@ -10,8 +10,6 @@ import (
 	"unsafe"
 
 	"github.com/newtools/ebpf"
-	"github.com/newtools/zsocket/inet"
-	"github.com/newtools/zsocket/nettypes"
 )
 
 type IPHdr struct {
@@ -106,25 +104,31 @@ func Example_socket() {
 	fmt.Printf("Filtering on eth index: %d\n", *index)
 	fmt.Println("Packet stats:")
 	for {
+		const (
+			ICMP = 0x01
+			TCP  = 0x06
+			UDP  = 0x11
+		)
+
 		time.Sleep(time.Second)
 		var icmp uint64
 		var tcp uint64
 		var udp uint64
-		ok, err := bpfMap.Get(uint32(nettypes.ICMP), &icmp)
+		ok, err := bpfMap.Get(uint32(ICMP), &icmp)
 		if err != nil {
 			panic(err)
 		}
 		if !ok {
 			icmp = 0
 		}
-		ok, err = bpfMap.Get(uint32(nettypes.TCP), &tcp)
+		ok, err = bpfMap.Get(uint32(TCP), &tcp)
 		if err != nil {
 			panic(err)
 		}
 		if !ok {
 			tcp = 0
 		}
-		ok, err = bpfMap.Get(uint32(nettypes.UDP), &udp)
+		ok, err = bpfMap.Get(uint32(UDP), &udp)
 		if err != nil {
 			panic(err)
 		}
@@ -136,13 +140,13 @@ func Example_socket() {
 }
 
 func openRawSock(index int) (int, error) {
-	eT := inet.HToNS(nettypes.All[:])
-	sock, err := syscall.Socket(syscall.AF_PACKET, syscall.SOCK_RAW|syscall.SOCK_NONBLOCK|syscall.SOCK_CLOEXEC, int(eT))
+	const ETH_P_ALL uint16 = 0x00<<8 | 0x03
+	sock, err := syscall.Socket(syscall.AF_PACKET, syscall.SOCK_RAW|syscall.SOCK_NONBLOCK|syscall.SOCK_CLOEXEC, int(ETH_P_ALL))
 	if err != nil {
 		return 0, err
 	}
 	sll := syscall.SockaddrLinklayer{}
-	sll.Protocol = eT
+	sll.Protocol = ETH_P_ALL
 	sll.Ifindex = index
 	if err := syscall.Bind(sock, &sll); err != nil {
 		return 0, err
