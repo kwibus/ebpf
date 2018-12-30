@@ -102,6 +102,16 @@ func LoadIndOp(size Size) OpCode {
 	return OpCode(LdClass).SetMode(IndMode).SetSize(size)
 }
 
+// LoadMap emits dsg = *map
+func LoadMap(dst Register, value int64) Instruction {
+	return Instruction{
+		OpCode:   LoadImmOp(DWord),
+		Dst:      dst,
+		Src:      1,
+		Constant: value,
+	}
+}
+
 // LoadInd emits `dst = ntoh(*(size *)(((sk_buff *)R6)->data + src + offset))`.
 func LoadInd(dst, src Register, offset int32, size Size) Instruction {
 	return Instruction{
