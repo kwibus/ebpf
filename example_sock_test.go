@@ -64,7 +64,7 @@ func Example_socket() {
 		asm.Sub.Imm(asm.R2, 4),
 		// load the map fd into memory, in argument 1 position
 		// lddw reg1, (*:from_user_space)(imm)
-		asm.LoadImm(asm.R1, int64(mapFd), asm.DWord),
+		asm.LoadMap(asm.R1, int64(mapFd)),
 		// call map lookup -> map_lookup_elem(r1, r2)
 		// call imm
 		asm.MapLookupElement.Call(),
